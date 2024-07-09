@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA API - Asteroides e Imagens Astronômicas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="mostrarImagemAstronomica()">Imagem Astronômica do Dia</a></li>
+                <li><a href="#" onclick="mostrarBuscaAsteroide()">Buscar Asteroide</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div id="content" class="container">
+        <!-- Imagem Astronômica do Dia -->
+        <div id="apod-section" class="section">
+            <h2>Imagem Astronômica do Dia</h2>
+            <button onclick="getApod()">Buscar Imagem</button>
+            <div id="apod-content"></div>
+        </div>
+        <!-- Buscar Asteroide -->
+        <div id="asteroid-section" class="section" style="display: none;">
+            <h2>Buscar Asteroide</h2>
+            <form onsubmit="buscarAsteroide(); return false;">
+                <input id="asteroid-id" type="text" placeholder="Informe o ID do asteroide...">
+                <button>Buscar</button>
+            </form>
+            <div id="asteroid-content"></div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 NASA API. Todos os direitos reservados.</p>
+    </footer>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
