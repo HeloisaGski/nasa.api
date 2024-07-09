@@ -1,66 +1,53 @@
-const apiKey = 'vgSqnR4A4K0MxupXRGvowinhgVZJ7nxucdcbluEm'; 
+import { getApod } from 'api.js';
 
-async function getApod() {
+async function mostrarImagemAstronomica() {
+    const container = document.getElementById('imagem-container');
+    container.innerHTML = '';  // Limpar o conteúdo existente
+
     try {
-        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${apiKey}`);
-        if (!response.ok) throw new Error('Erro ao buscar a imagem');
+        const apodData = await getApod();
+        if (apodData) {
+            const { url, title, explanation } = apodData;
+            const mediaType = apodData.media_type;
 
-        const data = await response.json();
-        displayApod(data);
+            const imagemHTML = mediaType === 'image'
+                ? `<img src="${url}" alt="${title}" class="imagem" />`
+                : `<iframe src="${url}" title="${title}" class="imagem"></iframe>`;
+
+            container.innerHTML = `
+                <h2>${title}</h2>
+                ${imagemHTML}
+                <p>${explanation}</p>
+            `;
+        }
     } catch (error) {
-        console.error('Erro ao buscar a APOD:', error);
+        console.error('Erro ao buscar dados da APOD:', error);
+        container.innerHTML = '<p>Erro ao carregar a imagem.</p>';
     }
 }
 
-function displayApod(data) {
-    const apodContent = document.getElementById('apod-content');
-    apodContent.innerHTML = `
-        <h3>${data.title}</h3>
-        <p>${data.explanation}</p>
-        <img src="${data.url}" alt="${data.title}">
-    `;
-}
-
-async function buscarAsteroide() {
-    const id = document.getElementById('asteroid-id').value;
+async function baixarImagem() {
     try {
-        const response = await fetch(`https://api.nasa.gov/neo/rest/v1/neo/${id}?api_key=${apiKey}`);
-        if (!response.ok) throw new Error('Erro ao buscar o asteroide');
-
-        const data = await response.json();
-        displayAsteroide(data);
+        const apodData = await getApod();
+        if (apodData && apodData.media_type === 'image') {
+            const { url, title } = apodData;
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${title}.jpg`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            alert('Imagem baixada com sucesso!');
+        } else {
+            alert('A API não retornou uma imagem.');
+        }
     } catch (error) {
-        console.error('Erro ao buscar o asteroide:', error);
+        console.error('Erro ao baixar a imagem:', error);
+        alert('Erro ao baixar a imagem.');
     }
 }
 
-function displayAsteroide(data) {
-    const asteroidContent = document.getElementById('asteroid-content');
-    asteroidContent.innerHTML = `
-        <h3>${data.name}</h3>
-        <p><strong>Designação:</strong> ${data.designation}</p>
-        <p><strong>Diâmetro:</strong> ${data.estimated_diameter.kilometers.estimated_diameter_max.toFixed(2)} km</p>
-        <p><strong>Data de Aproximação:</strong> ${data.close_approach_data[0].close_approach_date}</p>
-        <p><strong>Velocidade:</strong> ${data.close_approach_data[0].relative_velocity.kilometers_per_hour} km/h</p>
-        <p><strong>Detalhes:</strong> <a href="${data.nasa_jpl_url}" target="_blank">Mais informações</a></p>
-    `;
-}
-
-function mostrarImagemAstronomica() {
-    document.getElementById('apod-section').style.display = 'block';
-    document.getElementById('asteroid-section').style.display = 'none';
-}
-
-function mostrarBuscaAsteroide() {
-    document.getElementById('apod-section').style.display = 'none';
-    document.getElementById('asteroid-section').style.display = 'block';
-}
-
-// Tornando as funções disponíveis no escopo global
-window.getApod = getApod;
-window.buscarAsteroide = buscarAsteroide;
+// Tornar as funções disponíveis globalmente
 window.mostrarImagemAstronomica = mostrarImagemAstronomica;
-window.mostrarBuscaAsteroide = mostrarBuscaAsteroide;
-
-// Carregar a imagem astronômica do dia ao carregar a página
-document.addEventListener('DOMContentLoaded', mostrarImagemAstronomica);
+window.baixarImagem = baixarImagem;
